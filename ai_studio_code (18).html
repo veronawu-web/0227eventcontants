@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026 VIP Offline Gala | Exclusive Access</title>
+    <style>
+        :root {
+            --bg-dark: #05050a; 
+            --brand-gold: #d4af37; 
+            --gold-light: #fceabb;
+            --gold-gradient: linear-gradient(135deg, #fceabb 0%, #fccd4d 50%, #f8b500 100%);
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(212, 175, 55, 0.2); 
+            --text-dim: rgba(255, 255, 255, 0.6);
+            --brand-pink: #ff2d78;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', 'Noto Sans TC', sans-serif; }
+        html { scroll-behavior: smooth; } /* 基本平滑捲動 */
+        body { background-color: var(--bg-dark); color: white; overflow-x: hidden; line-height: 1.5; }
+
+        .container { max-width: 600px; margin: 0 auto; padding-bottom: 20px; }
+
+        /* --- 1. 頁首與資訊 --- */
+        .hero-banner { width: 100%; background: radial-gradient(circle at center, #1a1a2e 0%, var(--bg-dark) 70%); padding-top: 10px; }
+        .hero-image { width: 100%; height: auto; display: block; }
+
+        .basic-info-box {
+            margin: 0 20px 30px; padding: 20px; border-radius: 20px;
+            background: linear-gradient(180deg, rgba(20, 20, 35, 0.8) 0%, var(--bg-dark) 100%);
+            border: 1px solid var(--glass-border); display: flex; flex-direction: column; gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .info-item { display: flex; align-items: center; gap: 12px; font-size: 14px; }
+        .info-icon { width: 32px; height: 32px; background: rgba(212, 175, 55, 0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: var(--gold-light); border: 1px solid var(--glass-border); }
+
+        /* --- 2. 主播快速導航 --- */
+        .host-section { margin-bottom: 40px; position: relative; width: 100%; }
+        .carousel-wrapper {
+            display: flex; overflow-x: auto; gap: 0;
+            scroll-snap-type: x mandatory; padding: 20px 0;
+            scrollbar-width: none; -ms-overflow-style: none;
+        }
+        .carousel-wrapper::-webkit-scrollbar { display: none; }
+        .host-nav-card {
+            flex: 0 0 65%; scroll-snap-align: center;
+            position: relative; border-radius: 24px; overflow: hidden;
+            transition: 0.4s; transform: scale(0.9); opacity: 0.4;
+            border: 1px solid var(--glass-border); aspect-ratio: 4/5; cursor: pointer;
+        }
+        .host-nav-card.active { transform: scale(1); opacity: 1; border-color: var(--brand-gold); box-shadow: 0 10px 30px rgba(212, 175, 55, 0.3); }
+        .host-nav-img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+        .host-nav-info { position: absolute; bottom: 0; left: 0; width: 100%; padding: 15px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); text-align: center; }
+        .carousel-spacer { flex: 0 0 17.5%; }
+
+        /* --- 3. 恢復：互動流程 --- */
+        .interaction-flow { margin: 0 20px 40px; padding: 25px 15px; border-radius: 24px; background: var(--glass); border: 1px solid var(--glass-border); text-align: center; }
+        .flow-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 15px; }
+        .flow-icon { width: 45px; height: 45px; background: rgba(212, 175, 55, 0.1); border: 1px solid var(--brand-gold); border-radius: 50%; margin: 0 auto 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--brand-gold); }
+
+        /* --- 4. 恢復：尊榮福利 --- */
+        .tiers-header { padding: 0 20px; margin-bottom: 20px; color: var(--gold-light); font-size: 1.2rem; font-weight: 800; text-align: center; letter-spacing: 2px; }
+        .tier-cards-stack { display: flex; flex-direction: column; gap: 15px; margin: 0 20px 40px; }
+        .tier-card { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 24px; padding: 24px; }
+        .tier-title { font-size: 1.2rem; font-weight: 900; margin-bottom: 12px; display: block; color: var(--gold-light); }
+        .tier-content-list { list-style: none; }
+        .tier-content-list li { font-size: 13px; color: #eee; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        .tier-content-list li::before { content: '✦'; color: var(--brand-gold); opacity: 0.6; }
+
+        /* --- 5. 恢復：抽獎區塊 --- */
+        .reward-group { margin: 0 20px 60px; border-radius: 24px; background: var(--glass); border: 1px solid var(--glass-border); overflow: hidden; }
+        .reward-table { padding: 15px 20px; }
+        .reward-row { display: grid; grid-template-columns: 85px 1fr; border-bottom: 1px solid var(--glass-border); padding: 12px 0; }
+        .row-head { font-size: 11px; font-weight: bold; color: var(--brand-gold); }
+        .row-body { font-size: 13px; color: #fff; line-height: 1.4; }
+        .lv30-banner { background: linear-gradient(90deg, #1e1e2e, #0a0a14); padding: 15px; border-top: 1px solid var(--brand-gold); text-align: center; color: var(--brand-gold); font-weight: bold; }
+
+        /* --- 6. 一頁式詳情清單 --- */
+        .section-label { text-align: center; color: var(--brand-gold); letter-spacing: 4px; font-weight: 800; margin: 40px 0 30px; display: flex; align-items: center; justify-content: center; gap: 15px; }
+        .section-label::before, .section-label::after { content: ''; height: 1px; width: 50px; background: var(--brand-gold); opacity: 0.4; }
+
+        .host-detail-item { 
+            margin: 0 20px 50px; 
+            background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+            border-radius: 30px; border: 1px solid var(--glass-border); overflow: hidden;
+            scroll-margin-top: 20px; /* 重要：捲動停止位置補償 */
+        }
+        .detail-hero { position: relative; width: 100%; height: 450px; }
+        .detail-img { width: 100%; height: 100%; object-fit: cover; }
+        .detail-name-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 40px 20px 20px; background: linear-gradient(to top, var(--bg-dark), transparent); }
+        
+        .interaction-menu { padding: 25px; }
+        .menu-row { margin-bottom: 18px; background: rgba(255,255,255,0.03); border-radius: 15px; padding: 18px; border-left: 3px solid var(--brand-gold); }
+        .ticket-badge { display: inline-block; background: var(--gold-gradient); color: black; font-size: 11px; font-weight: 900; padding: 2px 10px; border-radius: 4px; margin-bottom: 10px; }
+        .interaction-text { font-size: 14px; color: #fff; line-height: 1.6; }
+
+        /* --- 7. 報名區塊 --- */
+        .enroll-section { 
+            margin: 40px 20px 120px; padding: 40px 20px; border-radius: 30px; 
+            background: linear-gradient(145deg, #1a1a2e 0%, #05050a 100%); 
+            border: 2px solid var(--brand-gold); text-align: center;
+            scroll-margin-top: 20px;
+        }
+        .qr-placeholder { 
+            width: 220px; height: 220px; background: white; margin: 25px auto; 
+            padding: 12px; border-radius: 20px; box-shadow: 0 0 30px rgba(212, 175, 55, 0.4);
+        }
+        .qr-placeholder img { width: 100%; height: 100%; }
+
+        /* --- 8. 底部按鈕 --- */
+        .cta-container {
+            position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+            width: 100%; max-width: 600px; padding: 15px 20px calc(15px + env(safe-area-inset-bottom));
+            background: linear-gradient(to top, var(--bg-dark) 90%, transparent 100%);
+            z-index: 1000;
+        }
+        .main-btn {
+            width: 100%; padding: 18px; border-radius: 50px; border: none;
+            background: var(--gold-gradient); color: black; font-size: 18px; font-weight: 800;
+            cursor: pointer; box-shadow: 0 10px 30px rgba(212, 175, 55, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- 頁首 -->
+        <header class="hero-banner">
+            <img src="https://public.swag.live/campaigns/vip-offline-event/%E8%B3%87%E7%94%A2%201.png" class="hero-image">
+        </header>
+
+        <!-- 基本資訊 -->
+        <section class="basic-info-box">
+            <div class="info-item"><div class="info-icon">📅</div><div><p style="font-size: 10px; opacity: 0.6;">活動時間</p><p style="font-weight: bold; font-size: 13px; color: var(--gold-light);">2026/03/29 (週日) 13:00 - 17:00</p></div></div>
+            <div class="info-item"><div class="info-icon">📍</div><div><p style="font-size: 10px; opacity: 0.6;">活動地點</p><p style="font-weight: bold; font-size: 13px; color: var(--gold-light);">台北市大直區 (3/23私訊行前通知)</p></div></div>
+        </section>
+
+        <!-- 主播快速導航 -->
+        <section class="host-section">
+            <div class="carousel-wrapper" id="carousel"></div>
+            <p style="text-align: center; font-size: 14px; color: var(--brand-gold); margin-top: 10px;">✦ 點擊卡片跳轉詳情 ✦</p>
+        </section>
+
+        <!-- 恢復：互動流程 -->
+        <section class="interaction-flow">
+            <h3 style="font-size: 14px; color: var(--brand-gold); letter-spacing: 2px;">✦ 活動互動流程 ✦</h3>
+            <div class="flow-grid">
+                <div class="flow-step"><div class="flow-icon">🎟️</div><p style="font-size:11px;font-weight:bold;">購買互動券</p></div>
+                <div class="flow-step"><div class="flow-icon">🥂</div><p style="font-size:11px;font-weight:bold;">尋找心儀主播</p></div>
+                <div class="flow-step"><div class="flow-icon">💖</div><p style="font-size:11px;font-weight:bold;">一對一包廂</p></div>
+            </div>
+        </section>
+
+        <!-- 恢復：尊榮福利 -->
+        <div class="tiers-header">👑 報到福利與階級特權</div>
+        <section class="tier-cards-stack">
+            <div class="tier-card">
+                <span class="tier-title" style="color:#ff80ab;">LV 1 + 報到福利</span>
+                <ul class="tier-content-list">
+                    <li>報到鑽石 / 限量精緻茶點</li>
+                    <li>抽數十萬鑽石大獎</li>
+                </ul>
+            </div>
+            <div class="tier-card">
+                <span class="tier-title" style="color:#a8caba;">VIP LV 30 +</span>
+                <ul class="tier-content-list">
+                    <li>限定加抽 100,000 鑽石（1位）</li>
+                    <li>依照等級發放互動卷</li>
+                </ul>
+            </div>
+            <div class="tier-card">
+                <span class="tier-title" style="background:var(--gold-gradient);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">VIP LV 50 +</span>
+                <ul class="tier-content-list">
+                    <li>專屬酒水餐點 / 獨立休息室</li>
+                    <li>依照等級發放互動卷</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- 恢復：抽獎池 -->
+        <section class="reward-group">
+            <div style="padding: 20px 20px 5px; color: #00f2ff; font-size: 1.1rem; font-weight: 800;">💎 數十萬鑽石大獎池</div>
+            <div class="reward-table">
+                <div class="reward-row"><div class="row-head">20人達成</div><div class="row-body">200,000 鑽石（1位）</div></div>
+                <div class="reward-row"><div class="row-head">30人達成</div><div class="row-body">300,000 鑽石（1位） / 100,000 鑽石（1位）</div></div>
+                <div class="reward-row"><div class="row-head">50人達成</div><div class="row-body">400,000 鑽石（1位） / 200,000 鑽石（2位）</div></div>
+            </div>
+            <div class="lv30-banner">🔥 VIP LV30+ 限定加抽：100,000 鑽石</div>
+        </section>
+
+        <!-- 主播詳情 -->
+        <div class="section-label">豪華主播互動詳情</div>
+        <div class="host-detail-list" id="host-details-container"></div>
+
+        <!-- 報名區 -->
+        <div class="section-label" id="enroll-anchor">立即報名</div>
+        <section class="enroll-section" id="enroll-section">
+            <h2 style="color: var(--gold-light);">即刻參加同樂會</h2>
+            <div class="qr-placeholder">
+                <img src="https://public.swag.live/campaigns/vip-offline-event/3%E6%9C%88%E6%B4%BB%E5%8B%95%E5%A0%B1%E5%90%8D%E8%A1%A8.png" alt="QR Code">
+            </div>
+            <p style="font-size: 13px; color: var(--brand-gold);">掃描上方 QR CODE 填寫報名表</p>
+        </section>
+
+        <footer style="text-align: center; font-size: 10px; color: var(--text-dim); padding-bottom: 150px;">* 活動最終解釋權歸本平台所有</footer>
+    </div>
+
+    <!-- 底部固定按鈕 -->
+    <div class="cta-container">
+        <button id="main-enroll-btn" class="main-btn">掃描 QR CODE 報名參加</button>
+    </div>
+
+    <script>
+        const hostData = [
+            { id: 'guoguo', name: '粿粿', handle: '@guoguo777', img: 'https://public.swag.live/campaigns/vip-offline-event/image.png', menu: { 1: ['對看 5 秒'], 3: ['對看 5 秒 + 牽手 15 秒'], 5: ['對看 5 秒 + 牽手 15 秒', '或 抱抱 15 秒'] } },
+            { id: 'minicat', name: '妘霏', handle: '@minicat', img: 'https://public.swag.live/campaigns/vip-offline-event/%E5%A6%98%E9%9D%9E.png', menu: { 1: ['坐大腿抓手/抓奶/摸腿 30秒'], 3: ['牽手對視吃巧克力棒 30秒'], 5: ['波浪洗面奶 15秒'] } },
+            { id: 'stellajs', name: '葡萄', handle: '@stellajs', img: 'https://public.swag.live/campaigns/vip-offline-event/IMG_3986%20-%20%E5%B0%8F%E8%8A%B1.jpeg', menu: { 1: ['High Five'], 3: ['秘密福利轉盤 1 次'], 5: ['擁抱 20 秒'] } },
+            { id: 'sugercathy', name: '凱希 77', handle: '@sugercathy', img: 'https://public.swag.live/campaigns/vip-offline-event/IMG_0201%20-%20%E9%A8%B7%E5%87%B1%E5%B8%8C.jpeg', menu: { 1: ['男友背後抱 10 秒'], 3: ['看奶頭 10 秒'], 5: ['洗面奶 20 秒'] } }
+        ];
+
+        const randomizedHosts = [...hostData].sort(() => Math.random() - 0.5);
+
+        // --- 終極修正捲動函式 ---
+        function safeScrollTo(id) {
+            const element = document.getElementById(id);
+            if (!element) return;
+            
+            // 取得元素相對於整頁頂端的距離
+            const targetY = element.offsetTop - 20; 
+
+            // 針對不支援 smooth behavior 的設備使用傳統補償
+            window.scrollTo({
+                top: targetY,
+                behavior: 'smooth'
+            });
+
+            // 再次強制修正 (解決部分 Android 瀏覽器不理會 smooth 的問題)
+            if (!('scrollBehavior' in document.documentElement.style)) {
+                window.scrollTo(0, targetY);
+            }
+        }
+
+        function init() {
+            const nav = document.getElementById('carousel');
+            const details = document.getElementById('host-details-container');
+
+            nav.innerHTML = '<div class="carousel-spacer"></div>';
+            randomizedHosts.forEach(host => {
+                // 導航卡
+                const card = document.createElement('div');
+                card.className = 'host-nav-card';
+                card.innerHTML = `<img src="${host.img}" class="host-nav-img"><div class="host-nav-info"><p style="font-size:11px;color:var(--brand-gold);">${host.handle}</p><p style="font-weight:bold;font-size:15px;">${host.name}</p></div>`;
+                card.onclick = () => safeScrollTo(`detail-${host.id}`);
+                nav.appendChild(card);
+
+                // 詳情大卡
+                const detailItem = document.createElement('div');
+                detailItem.className = 'host-detail-item';
+                detailItem.id = `detail-${host.id}`;
+                
+                let menuHtml = '';
+                [1, 3, 5].forEach(t => {
+                    menuHtml += `<div class="menu-row"><span class="ticket-badge">${t} 張券互動</span><div class="interaction-text">${host.menu[t].join('<br>')}</div></div>`;
+                });
+
+                detailItem.innerHTML = `
+                    <div class="detail-hero"><img src="${host.img}" class="detail-img"><div class="detail-name-overlay"><h2 style="font-size:2.5rem;font-weight:900;">${host.name}</h2><p style="color:var(--brand-gold);font-weight:bold;">${host.handle}</p></div></div>
+                    <div class="interaction-menu">${menuHtml}</div>
+                `;
+                details.appendChild(detailItem);
+            });
+            nav.innerHTML += '<div class="carousel-spacer"></div>';
+        }
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('active');
+                else entry.target.classList.remove('active');
+            });
+        }, { root: document.getElementById('carousel'), threshold: 0.6 });
+
+        window.onload = () => {
+            init();
+            setTimeout(() => {
+                document.querySelectorAll('.host-nav-card').forEach(c => observer.observe(c));
+            }, 300);
+
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbzEsYmYnJOHUJmEzcuyDNBaZUt2j1kaKsLebjsqTZ1zKi3JYy4dFKZ9bmd4FfWyb41x/exec';
+            const formURL = 'https://docs.google.com/forms/d/e/1FAIpQLSdvjDWBwBhT37z7a8CK5rH5dXzIxJeKhWokhNK79OY8LCdjTA/viewform?usp=dialog';
+
+            document.getElementById('main-enroll-btn').onclick = function() {
+                safeScrollTo('enroll-anchor');
+                fetch(scriptURL, { method: 'GET', mode: 'no-cors' });
+                setTimeout(() => window.open(formURL, '_blank'), 1000);
+            };
+        };
+    </script>
+</body>
+</html>
