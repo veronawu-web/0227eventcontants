@@ -199,24 +199,76 @@
     </div>
 
     <!-- 底部固定按鈕 -->
-    <div class="cta-container">
-        <button id="main-enroll-btn" class="main-btn">立即報名參加同樂會</button>
-    </div>
+ <!-- 修改後的按鈕區塊 -->
+<div class="cta-container" id="cta-area" style="display: none;">
+    <!-- 這裡會由 JS 根據 VIP 身分動態插入按鈕 -->
+</div>
 
-    <!-- Modal -->
-    <div class="modal" id="host-modal">
-        <div class="modal-content">
-            <button class="modal-close" id="modal-close-btn">×</button>
-            <img id="modal-img" src="" class="modal-img">
-            <div class="modal-body">
-                <h2 id="modal-name" style="color: white; margin-bottom: 5px;"></h2>
-                <p id="modal-handle" style="color: var(--brand-gold); font-size: 14px; font-weight: bold;"></p>
-                <div id="modal-menu-container"></div>
-                <a id="modal-link" href="#" target="_blank" class="btn-profile">前往主播主頁</a>
-            </div>
-        </div>
-    </div>
+<script>
+    // 1. 設定你的 Cloud Run API 網址 (部署後產出的網址)
+    const CHECK_API_URL = "https://swag-vip-gate-xxxxxx-de.a.run.app/check_vip";
+    
+    // 2. 設定報名與儲值連結
+    const FORM_URL = "https://docs.google.com/forms/d/e/1FAIpQLSdvjDWBwBhT37z7a8CK5rH5dXzIxJeKhWokhNK79OY8LCdjTA/viewform?usp=dialog";
+    const RECHARGE_URL = "https://swag.live/recharge"; // 這裡換成你的儲值頁面連結
 
+    // 獲取 User ID
+    function getUserId() {
+        const params = new URLSearchParams(window.location.search);
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        return params.get('user_id') || hashParams.get('user_id');
+    }
+
+    // 渲染按鈕
+    function renderCTA(isVip) {
+        const ctaArea = document.getElementById('cta-area');
+        ctaArea.style.display = "block";
+        
+        if (isVip) {
+            ctaArea.innerHTML = `<button class="main-btn" onclick="window.open('${FORM_URL}', '_blank')">立即報名參加盛典</button>`;
+        } else {
+            ctaArea.innerHTML = `<button class="main-btn" style="background: var(--silver-gradient); color: white;" onclick="window.open('${RECHARGE_URL}', '_blank')">成為 VIP 即可報名</button>`;
+        }
+    }
+
+    // 檢查身分
+    async function verifyUser() {
+        const uid = getUserId();
+        if (!uid) {
+            renderCTA(false); // 沒 ID 當作非 VIP
+            return;
+        }
+
+        try {
+            const response = await fetch(`${CHECK_API_URL}?user_id=${uid}`);
+            const data = await response.json();
+            renderCTA(data.is_vip);
+        } catch (err) {
+            console.error("API Error:", err);
+            renderCTA(false); // 報錯預設導儲值
+        }
+    }
+
+    // --- 以下保留你原本的所有主播資料與 init 函數 ---
+    const hostData = [ ... ]; // 保留原本的資料
+    function initHosts() { ... } // 保留原本的
+    function openModal(host) { ... } // 保留原本的
+    function initTilt() { ... } // 保留原本的
+
+    window.onload = () => {
+        initHosts();
+        initTilt();
+        verifyUser(); // 啟動身分驗證
+        
+        // 輪播置中邏輯
+        setTimeout(() => {
+            document.querySelectorAll('.host-card').forEach(card => observer.observe(card));
+            const carousel = document.getElementById('carousel');
+            const cards = document.querySelectorAll('.host-card');
+            if(cards.length > 0) carousel.scrollLeft = cards[0].offsetLeft - (carousel.offsetWidth - cards[0].offsetWidth) / 2;
+        }, 300);
+    };
+</script>
     <script>
      const hostData = [
             { name: '粿粿', handle: '@guoguo777', img: 'https://public.swag.live/campaigns/vip-offline-event/image.png', link: 'https://swag.live/user/624c360b06776928e476b11b', menu: { 1: ['對看 5 秒'], 3: ['對看 5 秒 + 牽手 15 秒'], 5: ['對看 5 秒 + 牽手 15 秒', '或 抱抱 15 秒'] } },
