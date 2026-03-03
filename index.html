@@ -129,89 +129,79 @@
             </div>
         </div>
     </div>
-
     <script>
-        // --- 設定區 ---
-        const CONFIG = {
-            // 請將此處替換為您的 Web Preview 網址 (移除結尾斜線)
-            API_BASE: "https://8080-cs-bb704050-4573-41be-9299-742b985b477f.cs-asia-east1-vger.cloudshell.dev",
-            RECHARGE_URL: "https://swag.live/recharge", 
-            FORM_URL: "https://docs.google.com/forms/d/e/1FAIpQLSdvjDWBwBhT37z7a8CK5rH5dXzIxJeKhWokhNK79OY8LCdjTA/viewform?usp=dialog",
-            LOG_URL: "https://script.google.com/macros/s/AKfycbzEAzLs2czXudSGCf20iEV_pNnBUiV4rx-Y-Osf2773urXpR24GI2ib3EEywU-7qVL5/exec"
-        };
+    // --- 1. 設定區 ---
+    const CONFIG = {
+        // 【請把主管給您的 n8n 網址貼在下面雙引號內】
+        API_URL: "https://swagops.app.n8n.cloud/workflow/LimBWnyjWWuMMNDe", 
+        
+        RECHARGE_URL: "https://swag.live/recharge", 
+        FORM_URL: "https://docs.google.com/forms/d/e/1FAIpQLSdvjDWBwBhT37z7a8CK5rH5dXzIxJeKhWokhNK79OY8LCdjTA/viewform?usp=dialog"
+    };
 
-        const hostData = [
-            { name: '粿粿', handle: '@guoguo777', img: 'https://public.swag.live/campaigns/vip-offline-event/image.png', link: 'https://swag.live/user/624c360b06776928e476b11b', menu: { 1: ['對看 5 秒'], 3: ['對看 5 秒 + 牽手 15 秒'], 5: ['對看 5 秒 + 牽手 15 秒', '或 抱抱 15 秒'] } },
-            { name: '妘霏', handle: '@minicat', img: 'https://public.swag.live/campaigns/vip-offline-event/%E5%A6%98%E9%9D%9E.png', link: 'https://swag.live/user/5d3ff8a0290e25d7ee2315a4', menu: { 1: ['坐大腿抓手 30秒'], 3: ['緊緊相擁親臉頰 15秒'], 5: ['波浪洗面奶 15秒'] } },
-            { name: '蜘蛛網', handle: '@wasteful', img: 'https://public.swag.live/campaigns/vip-offline-event/wasteful_%E8%9C%98%E8%9B%9B%E7%B6%B2.jpeg', link: 'https://swag.live/user/68d3ad7efdbd3e34bbc924da', menu: { 1: ['躺懷抱抱30秒'], 3: ['親額頭或臉頰30秒'], 5: ['性感熱舞脫衣全裸秀60秒'] } }
-        ];
+    // --- 2. 核心邏輯：對接 n8n 格式 ---
+    async function checkVipAndRender() {
+        const params = new URLSearchParams(window.location.search);
+        const uid = params.get('uid'); 
+        const btn = document.getElementById('main-enroll-btn');
 
-     // --- 2. 核心邏輯：VIP 判斷 ---
-        async function checkVipAndRender() {
-            const params = new URLSearchParams(window.location.search);
-            const uid = params.get('uid');
-            const btn = document.getElementById('main-enroll-btn');
+        if (!uid) {
+            setUpgradeBtn(btn, "立即成為 VIP (請先登入)");
+            return;
+        }
 
-            if (!uid) {
-                setUpgradeBtn(btn, "立即成為 VIP (請先登入)");
-                return;
-            }
+        // 組合 n8n 網址，並帶上 uid 參數
+        var finalApiUrl = CONFIG.API_URL + "?uid=" + uid;
 
-            // 組合網址：直接用字串相加，絕對不會出錯
-            var finalApiUrl = CONFIG.API_URL + "?uid=" + uid;
+        try {
+            console.log("正在請求 n8n API:", finalApiUrl);
+            const res = await fetch(finalApiUrl);
+            const data = await res.json();
 
-            try {
-                // 使用 redirect: 'follow' 處理 Google Apps Script 的重新導向
-                const res = await fetch(finalApiUrl, { method: 'GET', redirect: 'follow' });
-                const data = await res.json();
-
-                if (data.status === "success" && data.vip_level >= 1) {
-                    setEnrollBtn(btn);
-                } else {
-                    setUpgradeBtn(btn, "立即成為 VIP");
+            // --- 關鍵修正：處理主管給的 [ { ... } ] 陣列格式 ---
+            var userLevel = 0;
+            
+            // 判斷是否為陣列，並抓取第一個物件的 level_info
+            if (Array.isArray(data) && data.length > 0) {
+                if (data[0].level_info) {
+                    userLevel = data[0].level_info.level;
                 }
-            } catch (e) {
-                console.error("API 錯誤:", e);
-                setUpgradeBtn(btn, "立即成為 VIP"); 
+            } else if (data && data.level_info) {
+                // 如果主管改回物件格式也能通
+                userLevel = data.level_info.level;
             }
-        }
 
-        function setEnrollBtn(el) {
-            el.innerText = "立即報名參加同樂會";
-            el.className = "main-btn btn-enroll";
-            el.onclick = () => window.open(CONFIG.FORM_URL, '_blank');
-        }
+            console.log("從 n8n 抓到的用戶等級為:", userLevel);
 
-        function setUpgradeBtn(el, text) {
-            el.innerText = text;
-            el.className = "main-btn btn-upgrade";
-            el.onclick = () => window.open(CONFIG.RECHARGE_URL, '_blank');
+            // 判斷等級是否 >= 1
+            if (userLevel >= 1) {
+                setEnrollBtn(btn);
+            } else {
+                setUpgradeBtn(btn, "立即成為 VIP");
+            }
+        } catch (e) {
+            console.error("n8n 串接發生錯誤:", e);
+            // 發生錯誤時預設顯示成為 VIP
+            setUpgradeBtn(btn, "立即成為 VIP");
         }
+    }
 
-        // --- 3. UI 初始化 (保持原樣) ---
-        function initHosts() {
-            const container = document.getElementById('carousel');
-            const hostData = [
-                { name: '粿粿', handle: '@guoguo777', img: 'https://public.swag.live/campaigns/vip-offline-event/image.png' },
-                { name: '妘霏', handle: '@minicat', img: 'https://public.swag.live/campaigns/vip-offline-event/%E5%A6%98%E9%9D%9E.png' }
-            ];
-            container.innerHTML = '<div style="flex:0 0 15%"></div>';
-            hostData.forEach(h => {
-                const card = document.createElement('div');
-                card.className = 'host-card';
-                card.innerHTML = `<img src="${h.img}" class="host-img"><div class="host-info"><p>${h.handle}</p><strong>${h.name}</strong></div>`;
-                container.appendChild(card);
-            });
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(e => e.target.classList.toggle('active', e.isIntersecting));
-            }, { root: container, threshold: 0.6 });
-            setTimeout(() => document.querySelectorAll('.host-card').forEach(c => observer.observe(c)), 300);
-        }
+    function setEnrollBtn(el) {
+        el.innerText = "立即報名參加同樂會";
+        el.className = "main-btn btn-enroll";
+        el.onclick = () => window.open(CONFIG.FORM_URL, '_blank');
+    }
 
-        window.onload = () => {
-            initHosts();
-            checkVipAndRender();
-        };
-    </script>
+    function setUpgradeBtn(el, text) {
+        el.innerText = text;
+        el.className = "main-btn btn-upgrade";
+        el.onclick = () => window.open(CONFIG.RECHARGE_URL, '_blank');
+    }
+
+    window.onload = () => {
+        // initHosts(); // 如果有主播輪播請開啟這行
+        checkVipAndRender();
+    };
+        </script>
 </body>
 </html>
