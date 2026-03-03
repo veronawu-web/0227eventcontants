@@ -132,14 +132,14 @@
     <script>
     // --- 1. 設定區 ---
     const CONFIG = {
-        // 【這就是你給我的那支網址，但我們把最後面的 ID 拿掉，讓程式自動接上去】
-        API_BASE_URL: "https://api.swag.live/inspector/user/",
+        // 請填入主管給您的正式 Webhook 網址 (需為 /webhook/ 開頭)
+        API_URL: "https://swagops.app.n8n.cloud/webhook/LimBWnyjWWuMMNDe", 
         
         RECHARGE_URL: "https://swag.live/recharge", 
         FORM_URL: "https://docs.google.com/forms/d/e/1FAIpQLSdvjDWBwBhT37z7a8CK5rH5dXzIxJeKhWokhNK79OY8LCdjTA/viewform?usp=dialog"
     };
 
-    // --- 2. 核心邏輯 ---
+    // --- 2. 核心邏輯：精準對接主管給的資料結構 ---
     async function checkVipAndRender() {
         const params = new URLSearchParams(window.location.search);
         const uid = params.get('uid'); 
@@ -150,39 +150,47 @@
             return;
         }
 
-        // 【重點！】將 API 基礎網址 + 網址列傳進來的 uid 組合起來
-        // 組合結果：https://api.swag.live/inspector/user/693d121965e1e17a7f081d74
-        const finalApiUrl = CONFIG.API_BASE_URL + uid;
+        const finalApiUrl = CONFIG.API_URL + "?uid=" + uid;
 
         try {
-            console.log("正在請求官方數據:", finalApiUrl);
-            const res = await fetch(finalApiUrl);
+            console.log("正在串接 n8n 數據...");
+            const res = await fetch(finalApiUrl, {
+                method: 'GET',
+                mode: 'cors' // 這裡需要 n8n 那邊開啟 Access-Control-Allow-Origin
+            });
+
+            // 取得主管給的那份 JSON 資料 [ { ... } ]
             const data = await res.json();
+            console.log("收到主管定義的資料結構:", data);
 
-            // 抓取等級 (結構：level_info -> level)
+            // --- 依照主管資料結構進行抓取 ---
             var userLevel = 0;
-            // 處理可能是陣列格式的情況
-            let userData = Array.isArray(data) ? data[0] : data;
 
-            if (userData && userData.level_info) {
-                userLevel = userData.level_info.level;
+            // 邏輯：data 是陣列 [0] -> 找到 level_info -> 找到 level
+            if (Array.isArray(data) && data.length > 0) {
+                const userInfo = data[0]; // 抓取陣列第一筆
+                if (userInfo.level_info && typeof userInfo.level_info.level !== 'undefined') {
+                    userLevel = userInfo.level_info.level;
+                }
             }
 
-            console.log("抓到的等級是:", userLevel);
+            console.log("最終判定等級為:", userLevel);
 
+            // 判斷等級：只要等級 >= 1 就顯示報名按鈕
             if (userLevel >= 1) {
                 setEnrollBtn(btn);
             } else {
+                // 如果 level 為 0 (如您提供的範例)，則顯示成為 VIP
                 setUpgradeBtn(btn, "立即成為 VIP");
             }
+
         } catch (e) {
-            console.error("串接官方 API 失敗:", e);
-            // 因為官方 API 通常有 CORS 限制，所以極大機率會噴錯，跳到這裡
+            console.error("串接失敗，原因可能是 CORS 或網址錯誤:", e);
             setUpgradeBtn(btn, "立即成為 VIP");
         }
     }
 
-    // 按鈕渲染函式 (保持不變)
+    // 按鈕切換功能
     function setEnrollBtn(el) {
         el.innerText = "立即報名參加同樂會";
         el.className = "main-btn btn-enroll";
@@ -197,6 +205,7 @@
 
     window.onload = () => {
         checkVipAndRender();
+        // initHosts(); // 如果有主播卡片功能請開啟
     };
 </script>
 </body>
