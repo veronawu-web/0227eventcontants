@@ -300,22 +300,35 @@
         }
 
         // === 介面功能：主播輪播與彈窗 ===
-        function initCarousel() {
+          ];
+        function shuffleHosts(array) {
+            const actualHosts = array.filter(h => h.type !== 'soon');
+            const soonCard = array.filter(h => h.type === 'soon');
+            for (let i = actualHosts.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [actualHosts[i], actualHosts[j]] = [actualHosts[j], actualHosts[i]];
+            }
+            return [...actualHosts, ...soonCard];
+        }
+
+        function initHosts() {
             const container = document.getElementById('carousel');
-            container.innerHTML = '<div class="carousel-spacer"></div>';
-            hostData.forEach((host) => {
+            if(!container) return;
+            container.innerHTML = ''; 
+            const startSpacer = document.createElement('div'); startSpacer.className = 'carousel-spacer'; container.appendChild(startSpacer);
+            
+            const randomizedData = shuffleHosts(hostData);
+            randomizedData.forEach((host) => {
                 const card = document.createElement('div');
-                card.className = 'host-card';
-                card.innerHTML = `<img src="${host.img}" class="host-img"><div class="host-info"><p style="font-size:12px; color:var(--brand-gold);">${host.handle}</p><p style="font-weight:bold;">${host.name}</p></div>`;
-                card.onclick = () => openModal(host);
+                card.className = 'host-card' + (host.type === 'soon' ? ' coming-soon-card' : '');
+                if (host.type === 'soon') { card.innerHTML = `<div class="coming-soon-text">敬請期待<br>其他主播公布</div>`; }
+                else {
+                    card.innerHTML = `<img src="${host.img}" class="host-img"><div class="host-info"><p class="host-handle">${host.handle}</p><p class="host-name" style="font-weight:bold;">${host.name}</p></div>`;
+                    card.addEventListener('click', () => openModal(host));
+                }
                 container.appendChild(card);
             });
-            container.innerHTML += '<div class="carousel-spacer"></div>';
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(e => e.target.classList.toggle('active', e.isIntersecting));
-            }, { root: container, threshold: 0.6 });
-            document.querySelectorAll('.host-card').forEach(c => observer.observe(c));
+            const endSpacer = document.createElement('div'); endSpacer.className = 'carousel-spacer'; container.appendChild(endSpacer);
         }
 
         function openModal(host) {
@@ -324,22 +337,40 @@
             document.getElementById('modal-name').innerText = host.name;
             document.getElementById('modal-handle').innerText = host.handle;
             document.getElementById('modal-link').href = host.link;
-            
             const menuContainer = document.getElementById('modal-menu-container');
             menuContainer.innerHTML = '';
             [1, 3, 5].forEach(ticket => {
-                const items = host.menu[ticket].map(it => `<p style="font-size:13px; color:#eee; margin-bottom:4px;">✦ ${it}</p>`).join('');
-                menuContainer.innerHTML += `<div style="margin-bottom:12px;"><span class="ticket-badge">${ticket} 券</span>${items}</div>`;
+                const items = host.menu[ticket];
+                const cat = document.createElement('div'); cat.className = 'menu-category';
+                const itemsHtml = items.map((it, idx) => `<div class="menu-item" style="color:white; font-size:14px; margin-bottom:5px;">${it}</div>`).join('');
+                cat.innerHTML = `<div style="margin:15px 0 5px;"><span class="ticket-badge">${ticket} 張券</span></div><div>${itemsHtml}</div>`;
+                menuContainer.appendChild(cat);
             });
-            modal.style.display = 'flex';
+            modal.classList.add('active');
         }
 
-        function closeModal() { document.getElementById('host-modal').style.display = 'none'; }
+        document.getElementById('modal-close-btn').onclick = () => document.getElementById('host-modal').classList.remove('active');
 
         window.onload = () => {
-            initCarousel();
-            checkUserLevel();
+            initHosts(); 
+            
+            const scriptURL = 'https://script.google.com/macros/s/AKfycbzEsYmYnJOHUJmEzcuyDNBaZUt2j1kaKsLebjsqTZ1zKi3JYy4dFKZ9bmd4FfWyb41x/exec';
+            const formURL = 'https://docs.google.com/forms/d/e/1FAIpQLSdvjDWBwBhT37z7a8CK5rH5dXzIxJeKhWokhNK79OY8LCdjTA/viewform?usp=dialog';
+
+            document.getElementById('main-enroll-btn').onclick = function() {
+                fetch(scriptURL, { method: 'GET', mode: 'no-cors' });
+                window.open(formURL, '_blank');
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('active'); else entry.target.classList.remove('active'); });
+            }, { root: document.getElementById('carousel'), threshold: 0.6 });
+
+            setTimeout(() => {
+                document.querySelectorAll('.host-card').forEach(card => observer.observe(card));
+            }, 300);
         };
+    </script>
     </script>
 </body>
 </html>
