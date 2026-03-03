@@ -132,66 +132,57 @@
     <script>
     // --- 1. 設定區 ---
     const CONFIG = {
-        // 基本網址，後面的 ID 會由程式自動接上去
+        // 【這就是你給我的那支網址，但我們把最後面的 ID 拿掉，讓程式自動接上去】
         API_BASE_URL: "https://api.swag.live/inspector/user/",
         
         RECHARGE_URL: "https://swag.live/recharge", 
         FORM_URL: "https://docs.google.com/forms/d/e/1FAIpQLSdvjDWBwBhT37z7a8CK5rH5dXzIxJeKhWokhNK79OY8LCdjTA/viewform?usp=dialog"
     };
 
-    // --- 2. 核心邏輯：動態對接 Inspector API ---
+    // --- 2. 核心邏輯 ---
     async function checkVipAndRender() {
-        // 抓取網址參數裡的 uid
         const params = new URLSearchParams(window.location.search);
         const uid = params.get('uid'); 
         const btn = document.getElementById('main-enroll-btn');
 
-        // 如果網址沒帶 uid
         if (!uid) {
-            console.log("網址未偵測到 UID");
             setUpgradeBtn(btn, "立即成為 VIP (請先登入)");
             return;
         }
 
-        // 組合 API 網址，例如：https://api.swag.live/inspector/user/693d121...
+        // 【重點！】將 API 基礎網址 + 網址列傳進來的 uid 組合起來
+        // 組合結果：https://api.swag.live/inspector/user/693d121965e1e17a7f081d74
         const finalApiUrl = CONFIG.API_BASE_URL + uid;
 
         try {
-            console.log("正在發送請求至:", finalApiUrl);
-            
-            // 發送 API 請求
+            console.log("正在請求官方數據:", finalApiUrl);
             const res = await fetch(finalApiUrl);
             const data = await res.json();
 
-            console.log("API 回傳原始資料:", data);
-
-            // --- 依照您提供的資料結構抓取等級 ---
+            // 抓取等級 (結構：level_info -> level)
             var userLevel = 0;
-            
-            // 處理可能是陣列 [ { ... } ] 或物件 { ... } 的情況
+            // 處理可能是陣列格式的情況
             let userData = Array.isArray(data) ? data[0] : data;
 
             if (userData && userData.level_info) {
                 userLevel = userData.level_info.level;
             }
 
-            console.log("解析後的用戶等級:", userLevel);
+            console.log("抓到的等級是:", userLevel);
 
-            // 判斷等級邏輯：等級 >= 1 顯示報名，否則顯示成為 VIP
             if (userLevel >= 1) {
                 setEnrollBtn(btn);
             } else {
                 setUpgradeBtn(btn, "立即成為 VIP");
             }
-
         } catch (e) {
-            console.error("API 串接錯誤:", e);
-            // 發生錯誤 (如 CORS) 時，保險起見顯示成為 VIP 按鈕
+            console.error("串接官方 API 失敗:", e);
+            // 因為官方 API 通常有 CORS 限制，所以極大機率會噴錯，跳到這裡
             setUpgradeBtn(btn, "立即成為 VIP");
         }
     }
 
-    // 按鈕渲染函式
+    // 按鈕渲染函式 (保持不變)
     function setEnrollBtn(el) {
         el.innerText = "立即報名參加同樂會";
         el.className = "main-btn btn-enroll";
@@ -204,9 +195,7 @@
         el.onclick = () => window.open(CONFIG.RECHARGE_URL, '_blank');
     }
 
-    // 頁面加載初始化
     window.onload = () => {
-        // initHosts(); // 如果有主播輪播功能請取消註解
         checkVipAndRender();
     };
 </script>
