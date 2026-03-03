@@ -132,60 +132,66 @@
     <script>
     // --- 1. 設定區 ---
     const CONFIG = {
-        // 【請把主管給您的 n8n 網址貼在下面雙引號內】
-        API_URL: "https://swagops.app.n8n.cloud/workflow/LimBWnyjWWuMMNDe", 
+        // 基本網址，後面的 ID 會由程式自動接上去
+        API_BASE_URL: "https://api.swag.live/inspector/user/",
         
         RECHARGE_URL: "https://swag.live/recharge", 
         FORM_URL: "https://docs.google.com/forms/d/e/1FAIpQLSdvjDWBwBhT37z7a8CK5rH5dXzIxJeKhWokhNK79OY8LCdjTA/viewform?usp=dialog"
     };
 
-    // --- 2. 核心邏輯：對接 n8n 格式 ---
+    // --- 2. 核心邏輯：動態對接 Inspector API ---
     async function checkVipAndRender() {
+        // 抓取網址參數裡的 uid
         const params = new URLSearchParams(window.location.search);
         const uid = params.get('uid'); 
         const btn = document.getElementById('main-enroll-btn');
 
+        // 如果網址沒帶 uid
         if (!uid) {
+            console.log("網址未偵測到 UID");
             setUpgradeBtn(btn, "立即成為 VIP (請先登入)");
             return;
         }
 
-        // 組合 n8n 網址，並帶上 uid 參數
-        var finalApiUrl = CONFIG.API_URL + "?uid=" + uid;
+        // 組合 API 網址，例如：https://api.swag.live/inspector/user/693d121...
+        const finalApiUrl = CONFIG.API_BASE_URL + uid;
 
         try {
-            console.log("正在請求 n8n API:", finalApiUrl);
+            console.log("正在發送請求至:", finalApiUrl);
+            
+            // 發送 API 請求
             const res = await fetch(finalApiUrl);
             const data = await res.json();
 
-            // --- 關鍵修正：處理主管給的 [ { ... } ] 陣列格式 ---
+            console.log("API 回傳原始資料:", data);
+
+            // --- 依照您提供的資料結構抓取等級 ---
             var userLevel = 0;
             
-            // 判斷是否為陣列，並抓取第一個物件的 level_info
-            if (Array.isArray(data) && data.length > 0) {
-                if (data[0].level_info) {
-                    userLevel = data[0].level_info.level;
-                }
-            } else if (data && data.level_info) {
-                // 如果主管改回物件格式也能通
-                userLevel = data.level_info.level;
+            // 處理可能是陣列 [ { ... } ] 或物件 { ... } 的情況
+            let userData = Array.isArray(data) ? data[0] : data;
+
+            if (userData && userData.level_info) {
+                userLevel = userData.level_info.level;
             }
 
-            console.log("從 n8n 抓到的用戶等級為:", userLevel);
+            console.log("解析後的用戶等級:", userLevel);
 
-            // 判斷等級是否 >= 1
-            if (level >= 1) {
+            // 判斷等級邏輯：等級 >= 1 顯示報名，否則顯示成為 VIP
+            if (userLevel >= 1) {
                 setEnrollBtn(btn);
             } else {
                 setUpgradeBtn(btn, "立即成為 VIP");
             }
+
         } catch (e) {
-            console.error("n8n 串接發生錯誤:", e);
-            // 發生錯誤時預設顯示成為 VIP
+            console.error("API 串接錯誤:", e);
+            // 發生錯誤 (如 CORS) 時，保險起見顯示成為 VIP 按鈕
             setUpgradeBtn(btn, "立即成為 VIP");
         }
     }
 
+    // 按鈕渲染函式
     function setEnrollBtn(el) {
         el.innerText = "立即報名參加同樂會";
         el.className = "main-btn btn-enroll";
@@ -198,10 +204,11 @@
         el.onclick = () => window.open(CONFIG.RECHARGE_URL, '_blank');
     }
 
+    // 頁面加載初始化
     window.onload = () => {
-        // initHosts(); // 如果有主播輪播請開啟這行
+        // initHosts(); // 如果有主播輪播功能請取消註解
         checkVipAndRender();
     };
-        </script>
+</script>
 </body>
 </html>
