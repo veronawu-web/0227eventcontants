@@ -47,11 +47,12 @@
         .timer-lab { display: block; font-size: 8px; color: var(--text-dim); }
 
         /* 主播輪播 */
-        .host-section { margin-bottom: 30px; position: relative; width: 100%; }
+        .host-section { margin-bottom: 30px; position: relative; width: 100%; overflow: visible; }
         .carousel-wrapper {
             display: flex; overflow-x: auto; gap: 0;
             scroll-snap-type: x mandatory; padding: 30px 0;
             scrollbar-width: none; -ms-overflow-style: none;
+            position: relative; z-index: 5;
         }
         .carousel-wrapper::-webkit-scrollbar { display: none; }
         .host-card {
@@ -59,12 +60,14 @@
             position: relative; border-radius: 30px; overflow: hidden;
             transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
             transform: scale(0.85); opacity: 0.3;
-            filter: blur(2px) grayscale(40%); border: 1px solid var(--glass-border); aspect-ratio: 4/5; cursor: pointer;
+            filter: blur(2px) grayscale(40%); border: 1px solid var(--glass-border); aspect-ratio: 4/5; 
+            cursor: pointer; pointer-events: auto !important; z-index: 10;
         }
-        .host-card.active { transform: scale(1.05); opacity: 1; filter: blur(0) grayscale(0); border-color: var(--brand-gold); box-shadow: 0 15px 40px rgba(212, 175, 55, 0.2); z-index: 2; }
+        .host-card.active { transform: scale(1.05); opacity: 1; filter: blur(0) grayscale(0); border-color: var(--brand-gold); box-shadow: 0 15px 40px rgba(212, 175, 55, 0.2); z-index: 20; }
+        
         .host-img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
         .host-info { position: absolute; bottom: 0; left: 0; width: 100%; padding: 20px; background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); text-align: center; pointer-events: none; }
-        .carousel-spacer { flex: 0 0 15%; }
+        .carousel-spacer { flex: 0 0 15%; pointer-events: none; }
 
         /* 互動流程 */
         .interaction-flow { margin: 0 20px 40px; padding: 25px 15px; border-radius: 24px; background: var(--glass); border: 1px solid var(--glass-border); text-align: center; }
@@ -111,11 +114,11 @@
         .skeleton { animation: pulse 1.5s infinite; background: #333 !important; color: transparent !important; pointer-events: none; }
         @keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
 
-        /* Modal */
+        /* Modal 彈窗 */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); backdrop-filter: blur(20px); z-index: 9999; display: flex; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: 0.3s; }
         .modal.active { opacity: 1; pointer-events: auto; }
         .modal-content { background: #0a0a14; border: 1px solid var(--glass-border); width: 90%; max-width: 420px; height: 85vh; border-radius: 30px; overflow-y: auto; position: relative; }
-        .modal-close { position: absolute; top: 15px; right: 15px; background: rgba(212, 175, 55, 0.2); border: none; color: var(--gold-light); width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 20px; }
+        .modal-close { position: absolute; top: 15px; right: 15px; background: rgba(212, 175, 55, 0.2); border: none; color: var(--gold-light); width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 20px; z-index: 10000; }
         .modal-img { width: 100%; height: 320px; object-fit: cover; }
         .modal-body { padding: 25px; }
         .ticket-badge { background: var(--gold-gradient); color: black; font-size: 10px; padding: 2px 8px; border-radius: 4px; font-weight: 800; margin-right: 8px; }
@@ -145,10 +148,11 @@
             <div class="info-item"><div class="info-icon">📍</div><div><p style="font-size: 10px; opacity: 0.6;">活動地點</p><p style="font-weight: bold; font-size: 13px; color: var(--gold-light);">台北市大直區 (3/23私訊行前通知)</p></div></div>
         </section>
 
+        <!-- 主播輪播 -->
         <section class="host-section">
             <div class="carousel-wrapper" id="carousel"></div>
-            <p style="text-align: center; font-size: 14px; color: var(--brand-gold); margin-top: 15px;">✦ 點擊卡片查看互動詳情 ✦</p>
-            <p style="text-align: center; font-size: 14px; color: var(--brand-gold); margin-top: 15px;">✦ 主播顯示順序為隨機顯示 ✦</p>
+            <p style="text-align: center; font-size: 14px; color: var(--brand-gold); margin-top: 15px; font-weight: bold;">✦ 點擊卡片查看互動詳情 ✦</p>
+            <p style="text-align: center; font-size: 12px; color: var(--brand-gold); margin-top: 5px; opacity: 0.8;">✦ 主播顯示順序為隨機顯示 ✦</p>
         </section>
 
         <section class="interaction-flow">
@@ -184,14 +188,22 @@
         <footer style="text-align: center; font-size: 10px; color: var(--text-dim); padding-bottom: 150px;">* 活動最終解釋權歸本平台所有</footer>
     </div>
 
+    <!-- 底部按鈕 -->
     <div class="cta-container">
         <button id="main-enroll-btn" class="main-btn skeleton" disabled>Loading...</button>
     </div>
 
+    <!-- 詳情彈窗 -->
     <div class="modal" id="host-modal">
         <div class="modal-content">
             <button class="modal-close" id="modal-close-btn">×</button>
-            <img id="modal-img" src="" class="modal-img"><div class="modal-body"><h2 id="modal-name"></h2><p id="modal-handle" style="color: var(--brand-gold); font-weight: bold;"></p><div id="modal-menu-container"></div><a id="modal-link" href="#" target="_blank" style="display: block; width: 100%; padding: 16px; border-radius: 15px; background: var(--gold-gradient); color: black; font-weight: bold; text-decoration: none; margin-top: 25px; text-align: center;">前往主播主頁</a></div>
+            <img id="modal-img" src="" class="modal-img">
+            <div class="modal-body">
+                <h2 id="modal-name"></h2>
+                <p id="modal-handle" style="color: var(--brand-gold); font-weight: bold;"></p>
+                <div id="modal-menu-container"></div>
+                <a id="modal-link" href="#" target="_blank" style="display: block; width: 100%; padding: 16px; border-radius: 15px; background: var(--gold-gradient); color: black; font-weight: bold; text-decoration: none; margin-top: 25px; text-align: center;">前往主播主頁</a>
+            </div>
         </div>
     </div>
 
@@ -203,17 +215,37 @@
         const targetDate = new Date("2026-03-29T13:00:00").getTime();
 
         const hostData = [
-            { name: '粿粿', handle: '@guoguo777', img: 'https://public.swag.live/campaigns/vip-offline-event/image.png', link: 'https://swag.live/user/624c360b06776928e476b11b', menu: { 1: ['對看 5 秒'], 3: ['對看 5 秒 + 牽手 15 秒'], 5: ['對看 5 秒 + 牽手 15 秒', '或 抱抱 15 秒'] } },
-            { name: '妘霏', handle: '@minicat', img: 'https://public.swag.live/campaigns/vip-offline-event/%E5%A6%98%E9%9D%9E.png', link: 'https://swag.live/user/5d3ff8a0290e25d7ee2315a4', menu: { 1: ['坐大腿抓手 30秒'], 3: ['緊緊相擁 15秒'], 5: ['波浪洗面奶 15秒'] } },
-            { name: '葡萄', handle: '@stellajs', img: 'https://public.swag.live/campaigns/vip-offline-event/IMG_3986%20-%20%E5%B0%8F%E8%8A%B1.jpeg', link: 'https://swag.live/user/6186407baf71d358d49be7de', menu: { 1: ['High Five'], 3: ['十指緊扣 10 秒'], 5: ['擁抱 20 秒'] } },
-            { name: '凱希 77', handle: '@sugercathy', img: 'https://public.swag.live/campaigns/vip-offline-event/IMG_0201%20-%20%E9%A8%B7%E5%87%B1%E5%B8%8C.jpeg', link: 'https://swag.live/user/6049f47a9dff9d48464b1399', menu: { 1: ['十指緊扣 10 秒'], 3: ['看奶頭 10 秒'], 5: ['洗面奶 20 秒'] } },
-            { name: '糖騎羊🐑', handle: '@belene.', img: 'https://public.swag.live/campaigns/vip-offline-event/belene_%E7%B3%96%E9%A8%8E%E7%BE%8A%F0%9F%90%91.jpeg', link: 'https://swag.live/user/671bcccf0f86853f534cc65e', menu: { 1: ['聊天3分鐘'], 3: ['對看5秒'], 5: ['大擁抱3秒'] } },
-            { name: '金金', handle: '@chinchin1010', img: 'https://public.swag.live/campaigns/vip-offline-event/chinchin1010_%E9%87%91%E9%87%91.jpeg', link: 'https://swag.live/user/67ee5ea8b8ccbeb66ca67f78', menu: { 1: ['小拇指勾勾手10秒'], 3: ['勾手臂10秒'], 5: ['磨鼻子10秒'] } },
-            { name: '蜘蛛網', handle: '@wasteful', img: 'https://public.swag.live/campaigns/vip-offline-event/wasteful_%E8%9C%98%E8%9B%9B%E7%B6%B2.jpeg', link: 'https://swag.live/user/68d3ad7efdbd3e34bbc924da', menu: { 1: ['牽手30秒'], 3: ['親臉頰30秒'], 5: ['性感熱舞脫衣秀60秒'] } },
-            { name: '魚美人', handle: '@woolice42', img: 'https://public.swag.live/campaigns/vip-offline-event/woolice42_%E9%AD%9A%E7%BE%8E%E4%BA%BA.JPG', link: 'https://swag.live/user/69815f42cd46ac834e55c177', menu: { 1: ['牽手20秒'], 3: ['對視10秒'], 5: ['抱抱15秒'] } }
+            { id: 0, name: '粿粿', handle: '@guoguo777', img: 'https://public.swag.live/campaigns/vip-offline-event/image.png', link: 'https://swag.live/user/624c360b06776928e476b11b', menu: { 1: ['對看 5 秒'], 3: ['對看 5 秒 + 牽手 15 秒'], 5: ['對看 5 秒 + 牽手 15 秒', '或 抱抱 15 秒'] } },
+            { id: 1, name: '妘霏', handle: '@minicat', img: 'https://public.swag.live/campaigns/vip-offline-event/%E5%A6%98%E9%9D%9E.png', link: 'https://swag.live/user/5d3ff8a0290e25d7ee2315a4', menu: { 1: ['坐大腿抓手 30秒'], 3: ['緊緊相擁 15秒'], 5: ['波浪洗面奶 15秒'] } },
+            { id: 2, name: '葡萄', handle: '@stellajs', img: 'https://public.swag.live/campaigns/vip-offline-event/IMG_3986%20-%20%E5%B0%8F%E8%8A%B1.jpeg', link: 'https://swag.live/user/6186407baf71d358d49be7de', menu: { 1: ['High Five'], 3: ['十指緊扣 10 秒'], 5: ['擁抱 20 秒'] } },
+            { id: 3, name: '凱希 77', handle: '@sugercathy', img: 'https://public.swag.live/campaigns/vip-offline-event/IMG_0201%20-%20%E9%A8%B7%E5%87%B1%E5%B8%8C.jpeg', link: 'https://swag.live/user/6049f47a9dff9d48464b1399', menu: { 1: ['十指緊扣 10 秒'], 3: ['看奶頭 10 秒'], 5: ['洗面奶 20 秒'] } },
+            { id: 4, name: '糖騎羊🐑', handle: '@belene.', img: 'https://public.swag.live/campaigns/vip-offline-event/belene_%E7%B3%96%E9%A8%8E%E7%BE%8A%F0%9F%90%91.jpeg', link: 'https://swag.live/user/671bcccf0f86853f534cc65e', menu: { 1: ['聊天3分鐘'], 3: ['對看5秒'], 5: ['大擁抱3秒'] } },
+            { id: 5, name: '金金', handle: '@chinchin1010', img: 'https://public.swag.live/campaigns/vip-offline-event/chinchin1010_%E9%87%91%E9%87%91.jpeg', link: 'https://swag.live/user/67ee5ea8b8ccbeb66ca67f78', menu: { 1: ['小拇指勾勾手10秒'], 3: ['勾手臂10秒'], 5: ['磨鼻子10秒'] } },
+            { id: 6, name: '蜘蛛網', handle: '@wasteful', img: 'https://public.swag.live/campaigns/vip-offline-event/wasteful_%E8%9C%98%E8%9B%9B%E7%B6%B2.jpeg', link: 'https://swag.live/user/68d3ad7efdbd3e34bbc924da', menu: { 1: ['牽手30秒'], 3: ['親臉頰30秒'], 5: ['性感熱舞脫衣秀60秒'] } },
+            { id: 7, name: '魚美人', handle: '@woolice42', img: 'https://public.swag.live/campaigns/vip-offline-event/woolice42_%E9%AD%9A%E7%BE%8E%E4%BA%BA.JPG', link: 'https://swag.live/user/69815f42cd46ac834e55c177', menu: { 1: ['牽手20秒'], 3: ['對視10秒'], 5: ['抱抱15秒'] } }
         ];
 
-        // 1. 等級檢查功能 (解決「沒儲值的人」的問題)
+        // 彈窗開啟邏輯
+        window.showDetail = function(index) {
+            const host = hostData.find(h => h.id === index);
+            if (!host) return;
+
+            const modal = document.getElementById('host-modal');
+            document.getElementById('modal-img').src = host.img;
+            document.getElementById('modal-name').innerText = host.name;
+            document.getElementById('modal-handle').innerText = host.handle;
+            document.getElementById('modal-link').href = host.link;
+            
+            const container = document.getElementById('modal-menu-container'); 
+            container.innerHTML = '';
+            [1, 3, 5].forEach(t => {
+                const items = host.menu[t].map(i => `<div style="color:white; font-size:14px; margin-bottom:5px;">✦ ${i}</div>`).join('');
+                container.innerHTML += `<div style="margin:15px 0 5px;"><span class="ticket-badge">${t} 張券</span></div>${items}`;
+            });
+            
+            modal.classList.add('active');
+        };
+
         async function checkUserLevel() {
             const btn = document.getElementById('main-enroll-btn');
             const urlParams = new URLSearchParams(window.location.search);
@@ -227,28 +259,28 @@
                 btn.classList.remove('skeleton');
                 btn.disabled = false;
 
-                if (level >= 1) { // 假設等級 >= 1 代表已達儲值門檻
+                if (level >= 1) { 
                     btn.innerText = "立即報名參加同樂會";
                     btn.style.background = "var(--gold-gradient)";
+                    btn.style.color = "black";
                     btn.onclick = () => window.open(FORM_URL, '_blank');
                 } else {
                     btn.innerText = "儲值 10000 鑽石即可報名";
                     btn.style.background = "linear-gradient(135deg, #444, #222)";
                     btn.style.border = "1px solid var(--brand-pink)";
+                    btn.style.color = "white"; 
                     btn.onclick = () => window.open(RECHARGE_URL, '_blank');
                 }
-            } catch (e) {
-                btn.innerText = "載入失敗，請重整頁面";
-            }
+            } catch (e) { btn.innerText = "載入失敗"; }
         }
 
         function updateCountdown() {
             const gap = targetDate - new Date().getTime();
-            const second = 1000, minute = second * 60, hour = minute * 60, day = hour * 24;
-            document.getElementById('days').innerText = Math.floor(gap / day).toString().padStart(2, '0');
-            document.getElementById('hours').innerText = Math.floor((gap % day) / hour).toString().padStart(2, '0');
-            document.getElementById('mins').innerText = Math.floor((gap % hour) / minute).toString().padStart(2, '0');
-            document.getElementById('secs').innerText = Math.floor((gap % minute) / second).toString().padStart(2, '0');
+            const s=1000, m=s*60, h=m*60, d=h*24;
+            document.getElementById('days').innerText = Math.floor(gap / d).toString().padStart(2, '0');
+            document.getElementById('hours').innerText = Math.floor((gap % d) / h).toString().padStart(2, '0');
+            document.getElementById('mins').innerText = Math.floor((gap % h) / m).toString().padStart(2, '0');
+            document.getElementById('secs').innerText = Math.floor((gap % m) / s).toString().padStart(2, '0');
         }
 
         async function fetchSignupData() {
@@ -264,31 +296,29 @@
         function initHosts() {
             const container = document.getElementById('carousel');
             container.innerHTML = '<div class="carousel-spacer"></div>';
-            hostData.sort(() => Math.random() - 0.5).forEach(host => {
+            
+            const shuffled = [...hostData].sort(() => Math.random() - 0.5);
+            
+            shuffled.forEach(host => {
                 const card = document.createElement('div');
                 card.className = 'host-card';
-                card.innerHTML = `<img src="${host.img}" class="host-img"><div class="host-info"><p style="color:var(--brand-gold); font-size:12px;">${host.handle}</p><p style="font-weight:bold;">${host.name}</p></div>`;
-                card.onclick = () => openModal(host);
+                // 核心修復：直接將 onclick 綁定在內聯 HTML
+                card.setAttribute('onclick', `showDetail(${host.id})`);
+                card.innerHTML = `
+                    <img src="${host.img}" class="host-img">
+                    <div class="host-info">
+                        <p style="color:var(--brand-gold); font-size:12px;">${host.handle}</p>
+                        <p style="font-weight:bold;">${host.name}</p>
+                    </div>
+                `;
                 container.appendChild(card);
             });
             container.innerHTML += '<div class="carousel-spacer"></div>';
+            
             const observer = new IntersectionObserver(entries => {
                 entries.forEach(en => en.target.classList.toggle('active', en.isIntersecting));
             }, { root: container, threshold: 0.6 });
             document.querySelectorAll('.host-card').forEach(c => observer.observe(c));
-        }
-
-        function openModal(host) {
-            const modal = document.getElementById('host-modal');
-            document.getElementById('modal-img').src = host.img;
-            document.getElementById('modal-name').innerText = host.name;
-            document.getElementById('modal-handle').innerText = host.handle;
-            const container = document.getElementById('modal-menu-container'); container.innerHTML = '';
-            [1, 3, 5].forEach(t => {
-                const items = host.menu[t].map(i => `<div style="color:white; font-size:14px; margin-bottom:5px;">✦ ${i}</div>`).join('');
-                container.innerHTML += `<div style="margin:15px 0 5px;"><span class="ticket-badge">${t} 張券</span></div>${items}`;
-            });
-            modal.classList.add('active');
         }
 
         document.getElementById('modal-close-btn').onclick = () => document.getElementById('host-modal').classList.remove('active');
@@ -296,8 +326,9 @@
         window.onload = () => {
             initHosts();
             fetchSignupData();
-            checkUserLevel(); // 啟動儲值判斷邏輯
-            setInterval(updateCountdown, 1000); updateCountdown();
+            checkUserLevel(); 
+            setInterval(updateCountdown, 1000); 
+            updateCountdown();
         };
     </script>
 </body>
